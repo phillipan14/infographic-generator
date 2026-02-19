@@ -4,6 +4,8 @@ Generate beautiful infographics from text prompts using AI.
 
 Type a description, AI generates the design, download as PNG.
 
+![Infographic Generator](public/screenshot-main.png)
+
 ## How it works
 
 1. You describe what you want (e.g., "a comparison of React vs Vue")
