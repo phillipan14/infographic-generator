@@ -17,7 +17,7 @@ export default function PromptInput({
 }: Props) {
   return (
     <div className="space-y-3">
-      <label className="block text-sm font-medium text-zinc-400">
+      <label className="block text-xs font-medium tracking-wide uppercase" style={{ color: "var(--muted)" }}>
         Describe your infographic
       </label>
       <textarea
@@ -26,19 +26,41 @@ export default function PromptInput({
         onKeyDown={(e) => {
           if (e.key === "Enter" && e.metaKey && !disabled) onSubmit();
         }}
-        placeholder="e.g. A comparison of solar vs wind energy with key statistics, pros and cons, and global adoption rates..."
-        rows={4}
-        className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-white text-sm placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+        placeholder="A comparison of solar vs wind energy with key statistics, adoption rates, and environmental impact..."
+        rows={5}
+        className="input-base resize-none leading-relaxed"
       />
       <button
         onClick={onSubmit}
         disabled={disabled}
-        className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-zinc-700 disabled:text-zinc-500 text-white font-medium py-3 px-4 rounded-lg transition-colors text-sm"
+        className="w-full py-3 px-4 rounded-xl text-sm font-semibold tracking-wide transition-base"
+        style={{
+          background: disabled ? "var(--surface-raised)" : "var(--accent)",
+          color: disabled ? "var(--muted)" : "#0b0b0f",
+          cursor: disabled ? "not-allowed" : "pointer",
+          opacity: disabled ? 0.5 : 1,
+          boxShadow: disabled ? "none" : "0 0 20px var(--accent-glow)",
+        }}
+        onMouseEnter={(e) => {
+          if (!disabled) e.currentTarget.style.boxShadow = "0 0 30px rgba(245, 158, 11, 0.25)";
+        }}
+        onMouseLeave={(e) => {
+          if (!disabled) e.currentTarget.style.boxShadow = "0 0 20px var(--accent-glow)";
+        }}
       >
-        {loading ? "Generating..." : "Generate Infographic"}
+        {loading ? (
+          <span className="flex items-center justify-center gap-2">
+            <span className="inline-block w-4 h-4 border-2 rounded-full animate-spin" style={{ borderColor: "var(--accent-dim)", borderTopColor: "#0b0b0f" }} />
+            Generating...
+          </span>
+        ) : (
+          "Generate"
+        )}
       </button>
       {!loading && (
-        <p className="text-xs text-zinc-600 text-center">Cmd + Enter to generate</p>
+        <p className="text-[11px] text-center tracking-wide" style={{ color: "var(--muted)", opacity: 0.5 }}>
+          <kbd className="px-1.5 py-0.5 rounded text-[10px] font-mono" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>&#8984; Enter</kbd>
+        </p>
       )}
     </div>
   );

@@ -21,6 +21,12 @@ const PROVIDER_MODELS: Record<string, string[]> = {
   "openai-compatible": [],
 };
 
+const PROVIDER_LABELS: Record<string, { name: string; badge: string }> = {
+  openai: { name: "OpenAI", badge: "GPT" },
+  anthropic: { name: "Anthropic", badge: "Claude" },
+  "openai-compatible": { name: "Custom", badge: "API" },
+};
+
 export default function ApiKeyInput({
   provider,
   onProviderChange,
@@ -33,7 +39,6 @@ export default function ApiKeyInput({
 }: Props) {
   const [showKey, setShowKey] = useState(false);
 
-  // Persist API key to localStorage
   useEffect(() => {
     const saved = localStorage.getItem(`infogen-apikey-${provider}`);
     if (saved) onApiKeyChange(saved);
@@ -43,7 +48,6 @@ export default function ApiKeyInput({
     if (apiKey) localStorage.setItem(`infogen-apikey-${provider}`, apiKey);
   }, [apiKey, provider]);
 
-  // Set default model when provider changes
   useEffect(() => {
     const models = PROVIDER_MODELS[provider];
     if (models && models.length > 0) {
@@ -52,52 +56,58 @@ export default function ApiKeyInput({
   }, [provider]);
 
   return (
-    <div className="space-y-3">
-      <div className="flex gap-3">
-        <div className="flex-1">
-          <label className="block text-sm font-medium text-zinc-400 mb-1">
-            Provider
-          </label>
-          <select
-            value={provider}
-            onChange={(e) => onProviderChange(e.target.value as LLMProvider)}
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="openai">OpenAI</option>
-            <option value="anthropic">Anthropic</option>
-            <option value="openai-compatible">OpenAI-Compatible</option>
-          </select>
-        </div>
-        <div className="flex-1">
-          <label className="block text-sm font-medium text-zinc-400 mb-1">
-            Model
-          </label>
-          {PROVIDER_MODELS[provider]?.length > 0 ? (
-            <select
-              value={model}
-              onChange={(e) => onModelChange(e.target.value)}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+    <div className="space-y-4">
+      {/* Provider selector as pill tabs */}
+      <div>
+        <label className="block text-xs font-medium tracking-wide uppercase mb-2" style={{ color: "var(--muted)" }}>
+          Provider
+        </label>
+        <div className="flex gap-1.5 p-1 rounded-xl" style={{ background: "var(--surface)" }}>
+          {(["openai", "anthropic", "openai-compatible"] as LLMProvider[]).map((p) => (
+            <button
+              key={p}
+              onClick={() => onProviderChange(p)}
+              className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-medium transition-base"
+              style={{
+                background: provider === p ? "var(--accent)" : "transparent",
+                color: provider === p ? "#0b0b0f" : "var(--muted)",
+              }}
             >
-              {PROVIDER_MODELS[provider].map((m) => (
-                <option key={m} value={m}>
-                  {m}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <input
-              type="text"
-              value={model}
-              onChange={(e) => onModelChange(e.target.value)}
-              placeholder="e.g. llama-3.1-70b"
-              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          )}
+              <span className="font-semibold">{PROVIDER_LABELS[p].name}</span>
+            </button>
+          ))}
         </div>
       </div>
 
+      {/* Model selector */}
       <div>
-        <label className="block text-sm font-medium text-zinc-400 mb-1">
+        <label className="block text-xs font-medium tracking-wide uppercase mb-2" style={{ color: "var(--muted)" }}>
+          Model
+        </label>
+        {PROVIDER_MODELS[provider]?.length > 0 ? (
+          <select
+            value={model}
+            onChange={(e) => onModelChange(e.target.value)}
+            className="input-base"
+          >
+            {PROVIDER_MODELS[provider].map((m) => (
+              <option key={m} value={m}>{m}</option>
+            ))}
+          </select>
+        ) : (
+          <input
+            type="text"
+            value={model}
+            onChange={(e) => onModelChange(e.target.value)}
+            placeholder="e.g. llama-3.1-70b"
+            className="input-base"
+          />
+        )}
+      </div>
+
+      {/* API Key */}
+      <div>
+        <label className="block text-xs font-medium tracking-wide uppercase mb-2" style={{ color: "var(--muted)" }}>
           API Key
         </label>
         <div className="relative">
@@ -106,21 +116,26 @@ export default function ApiKeyInput({
             value={apiKey}
             onChange={(e) => onApiKeyChange(e.target.value)}
             placeholder="sk-..."
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 pr-16 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="input-base"
+            style={{ paddingRight: "52px" }}
           />
           <button
             type="button"
             onClick={() => setShowKey(!showKey)}
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-zinc-500 hover:text-zinc-300"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] font-medium tracking-wide transition-base"
+            style={{ color: "var(--muted)" }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--foreground)")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--muted)")}
           >
-            {showKey ? "Hide" : "Show"}
+            {showKey ? "HIDE" : "SHOW"}
           </button>
         </div>
       </div>
 
+      {/* Base URL for custom providers */}
       {provider === "openai-compatible" && (
         <div>
-          <label className="block text-sm font-medium text-zinc-400 mb-1">
+          <label className="block text-xs font-medium tracking-wide uppercase mb-2" style={{ color: "var(--muted)" }}>
             Base URL
           </label>
           <input
@@ -128,7 +143,7 @@ export default function ApiKeyInput({
             value={baseUrl}
             onChange={(e) => onBaseUrlChange(e.target.value)}
             placeholder="http://localhost:11434/v1"
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="input-base"
           />
         </div>
       )}
